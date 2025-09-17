@@ -19,10 +19,12 @@ app.get('/', (req, res) => {
   res.send('API is running');
 });
 
+// Correct Placement for Auth Routes
+app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/posts', require('./routes/postRoutes'));
+
 // Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-
