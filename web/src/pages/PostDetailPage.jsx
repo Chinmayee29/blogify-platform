@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Container, Spinner, Alert, Button } from 'react-bootstrap';
+import { Container, Spinner, Alert, Button, Image } from 'react-bootstrap';
 import { getPostById, deletePost } from '../features/postSlice';
 
 const PostDetailPage = () => {
@@ -42,6 +42,9 @@ const PostDetailPage = () => {
 
       {!isLoading && !isError && post && (
         <>
+          {post.imageUrl && (
+            <Image src={post.imageUrl} fluid className="mb-3" />
+          )}
           <h1 className="mb-3">{post.title}</h1>
           {isOwner && (
             <div className="mb-3">
