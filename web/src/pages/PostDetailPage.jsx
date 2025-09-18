@@ -1,13 +1,15 @@
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { Container, Spinner, Alert } from 'react-bootstrap';
-import { getPostById } from '../features/postSlice';
+import { Container, Spinner, Alert, Button } from 'react-bootstrap';
+import { getPostById, deletePost } from '../features/postSlice';
 
 const PostDetailPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { post, isLoading, isError, message } = useSelector((state) => state.posts);
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     if (id) {
@@ -15,8 +17,19 @@ const PostDetailPage = () => {
     }
   }, [dispatch, id]);
 
+  const isOwner = user && post && (user._id === (post.author?._id || post.author));
+
+  const handleDelete = async () => {
+    try {
+      await dispatch(deletePost(post._id)).unwrap();
+      navigate('/');
+    } catch (_) {
+      // error is already in slice state; optionally show alert via slice message
+    }
+  };
+
   return (
-    <Container className="py-4">
+    <Container className="content-box my-4"> {/* <-- THIS LINE IS UPDATED */}
       {isLoading && (
         <div className="d-flex justify-content-center py-5">
           <Spinner animation="border" role="status" />
@@ -30,6 +43,11 @@ const PostDetailPage = () => {
       {!isLoading && !isError && post && (
         <>
           <h1 className="mb-3">{post.title}</h1>
+          {isOwner && (
+            <div className="mb-3">
+              <Button variant="danger" size="sm" onClick={handleDelete}>Delete Post</Button>
+            </div>
+          )}
           <div>{post.content}</div>
         </>
       )}
@@ -38,5 +56,3 @@ const PostDetailPage = () => {
 };
 
 export default PostDetailPage;
-
-
