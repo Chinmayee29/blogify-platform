@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 // Correct Placement for Auth Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/posts', require('./routes/postRoutes'));
-
+app.use('/api/upload', require('./routes/uploadRoutes'));
 // Server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
