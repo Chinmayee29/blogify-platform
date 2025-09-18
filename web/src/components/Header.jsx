@@ -22,7 +22,8 @@ const Header = () => {
             {user ? (
               <>
                 <Nav.Link disabled>Hello, {user.name}</Nav.Link>
-                <Button variant="outline-light" size="sm" onClick={handleLogout}>Logout</Button>
+                <Button as={Link} to="/new-post" variant="light" size="sm" className="ms-2">New Post</Button>
+                <Button variant="outline-light" size="sm" className="ms-2" onClick={handleLogout}>Logout</Button>
               </>
             ) : (
               <>
