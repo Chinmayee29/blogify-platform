@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import api from '../services/api'; // Changed from axios
 
 const initialState = {
   posts: [],
@@ -10,9 +10,16 @@ const initialState = {
   message: ''
 };
 
+// NOTE: We need to pass the token for protected routes
+const getConfig = (token) => ({
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+});
+
 export const getPosts = createAsyncThunk('posts/getAll', async (_, thunkAPI) => {
   try {
-    const { data } = await axios.get('/api/posts');
+    const { data } = await api.get('/api/posts'); // Changed from axios
     return data;
   } catch (error) {
     const message = error?.response?.data?.message || error?.message || 'Failed to fetch posts';
@@ -22,7 +29,7 @@ export const getPosts = createAsyncThunk('posts/getAll', async (_, thunkAPI) => 
 
 export const getPostById = createAsyncThunk('posts/getById', async (id, thunkAPI) => {
   try {
-    const { data } = await axios.get(`/api/posts/${id}`);
+    const { data } = await api.get(`/api/posts/${id}`); // Changed from axios
     return data;
   } catch (error) {
     const message = error?.response?.data?.message || error?.message || 'Failed to fetch post';
@@ -32,13 +39,8 @@ export const getPostById = createAsyncThunk('posts/getById', async (id, thunkAPI
 
 export const createPost = createAsyncThunk('posts/create', async (payload, thunkAPI) => {
   try {
-    const state = thunkAPI.getState();
-    const token = state?.auth?.token;
-    const { data } = await axios.post('/api/posts', payload, {
-      headers: {
-        Authorization: token ? `Bearer ${token}` : ''
-      }
-    });
+    const token = thunkAPI.getState().auth.token;
+    const { data } = await api.post('/api/posts', payload, getConfig(token)); // Changed from axios
     return data;
   } catch (error) {
     const message = error?.response?.data?.message || error?.message || 'Failed to create post';
@@ -48,13 +50,8 @@ export const createPost = createAsyncThunk('posts/create', async (payload, thunk
 
 export const deletePost = createAsyncThunk('posts/delete', async (id, thunkAPI) => {
   try {
-    const state = thunkAPI.getState();
-    const token = state?.auth?.token;
-    await axios.delete(`/api/posts/${id}`, {
-      headers: {
-        Authorization: token ? `Bearer ${token}` : ''
-      }
-    });
+    const token = thunkAPI.getState().auth.token;
+    await api.delete(`/api/posts/${id}`, getConfig(token)); // Changed from axios
     return id;
   } catch (error) {
     const message = error?.response?.data?.message || error?.message || 'Failed to delete post';
@@ -78,9 +75,6 @@ const postSlice = createSlice({
       // getPosts
       .addCase(getPosts.pending, (state) => {
         state.isLoading = true;
-        state.isError = false;
-        state.isSuccess = false;
-        state.message = '';
       })
       .addCase(getPosts.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -90,14 +84,11 @@ const postSlice = createSlice({
       .addCase(getPosts.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.message = action.payload || 'Failed to fetch posts';
+        state.message = action.payload;
       })
       // getPostById
       .addCase(getPostById.pending, (state) => {
         state.isLoading = true;
-        state.isError = false;
-        state.isSuccess = false;
-        state.message = '';
       })
       .addCase(getPostById.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -107,14 +98,11 @@ const postSlice = createSlice({
       .addCase(getPostById.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.message = action.payload || 'Failed to fetch post';
+        state.message = action.payload;
       })
       // createPost
       .addCase(createPost.pending, (state) => {
         state.isLoading = true;
-        state.isError = false;
-        state.isSuccess = false;
-        state.message = '';
       })
       .addCase(createPost.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -125,14 +113,11 @@ const postSlice = createSlice({
       .addCase(createPost.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.message = action.payload || 'Failed to create post';
+        state.message = action.payload;
       })
       // deletePost
       .addCase(deletePost.pending, (state) => {
         state.isLoading = true;
-        state.isError = false;
-        state.isSuccess = false;
-        state.message = '';
       })
       .addCase(deletePost.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -146,12 +131,10 @@ const postSlice = createSlice({
       .addCase(deletePost.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
-        state.message = action.payload || 'Failed to delete post';
+        state.message = action.payload;
       });
   }
 });
 
 export const { resetStatus } = postSlice.actions;
 export default postSlice.reducer;
-
-
